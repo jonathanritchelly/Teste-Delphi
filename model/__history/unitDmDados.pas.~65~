@@ -26,9 +26,10 @@ type
     procedure pLimpaQuery(Query: TFDQuery);
     function fInserePedido(vCodigoCliente: Integer;
       vValorTotal: currency): Integer;
-    procedure fInsereItenPedido(vNumeroPedido, vCodigoProduto,
-      vQuantidade: Integer; vValorUnitario, vValorTotal: currency): Integer;
+    procedure pInsereItenPedido(vNumeroPedido, vCodigoProduto,
+      vQuantidade: Integer; vValorUnitario, vValorTotal: currency);
     procedure pBuscaCliente(ValorBusca: string);
+    function pCancelaPedido(vNumeroPedido: Integer): boolean;
     { Public declarations }
   end;
 
@@ -170,7 +171,7 @@ begin
   end;
 end;
 
-procedure TdmDados.fInsereItenPedido(vNumeroPedido, vCodigoProduto,
+procedure TdmDados.pInsereItenPedido(vNumeroPedido, vCodigoProduto,
   vQuantidade: Integer; vValorUnitario, vValorTotal: currency);
 var
   qry: TFDQuery;
@@ -226,6 +227,58 @@ begin
 
   qryClientes.SQL.Add('Order by Nome');
   qryClientes.Open();
+end;
+
+function TdmDados.pCancelaPedido(vNumeroPedido: Integer): boolean;
+var
+  qry: TFDQuery;
+begin
+
+  qry := pCriaQuery(qry);
+
+  Conn.StartTransaction;
+  try
+
+    try
+      // deleta os itens
+      qry.SQL.Text :=
+        'Delete from pedidos_produtos where numero_pedido= :numeroPedido';
+
+      qry.ParamByName('numeroPedido').AsInteger := vNumeroPedido;
+
+      qry.ExecSQL;
+
+      pLimpaQuery(qry);
+
+      // deleta o pedido
+      qry.SQL.Text :=
+        'Delete from pedidos_dados_gerais where numero_pedido= :numeroPedido';
+
+      qry.ParamByName('numeroPedido').AsInteger := vNumeroPedido;
+
+      qry.ExecSQL;
+
+      Conn.Commit;
+
+      pLimpaQuery(qry);
+
+      MsgInformacao('Pedido excluído com sucesso!');
+      Result := true;
+
+    except
+      on E: exception do
+      begin
+        Conn.Rollback;
+        MsgErro('Erro ao inserir registro: ' + E.Message);
+        Result := False;
+      end;
+
+    end;
+
+  finally
+    pLimpaQuery(qry);
+    freeandnil(qry);
+  end;
 end;
 
 end.

@@ -184,7 +184,8 @@ begin
 
     try
       qry.SQL.Text :=
-        'INSERT INTO pedidos_produtos (numero_pedido, codigo_produto, quantidade, valor_unitario, valor_total) Values(:numeroPedido, :codigoProduto, :quantidade, :valorUnitario, :valorTotal)';
+        'INSERT INTO pedidos_produtos (numero_pedido, codigo_produto, quantidade, valor_unitario, valor_total) '
+        + 'Values(:numeroPedido, :codigoProduto, :quantidade, :valorUnitario, :valorTotal)';
 
       qry.ParamByName('numeroPedido').AsInteger := vNumeroPedido;
       qry.ParamByName('codigoProduto').AsCurrency := vCodigoProduto;
