@@ -1,0 +1,5 @@
+Olá, algumas considerações:
+
+	o dump do banco e os scripts utilizados estão na pasta: db
+	a lib do banco está na pasta: executável
+	o arquivo .ini contendo as configurações do banco esta na pasta: executavel

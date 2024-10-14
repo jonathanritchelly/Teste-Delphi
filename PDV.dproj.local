@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2024/10/14 09:31:57.000.321,=C:\Users\jonat\OneDrive\Documentos\Embarcadero\Studio\Projects\Unit6.pas</Transaction>
+    <Transaction>2024/10/14 09:32:07.000.992,C:\Users\jonat\OneDrive\Documentos\Embarcadero\Studio\Projects\PDV.dproj=C:\Users\jonat\OneDrive\Documentos\Embarcadero\Studio\Projects\Project3.dproj</Transaction>
+    <Transaction>2024/10/14 09:32:29.000.513,D:\Teste Delphi\PDV.dproj=C:\Users\jonat\OneDrive\Documentos\Embarcadero\Studio\Projects\PDV.dproj</Transaction>
+    <Transaction>2024/10/14 09:33:29.000.924,=D:\Teste Delphi\Unit1.pas</Transaction>
+    <Transaction>2024/10/14 09:33:45.000.186,D:\Teste Delphi\model\unitDmDados.dfm=D:\Teste Delphi\Unit1.dfm</Transaction>
+    <Transaction>2024/10/14 09:33:45.000.186,D:\Teste Delphi\model\unitDmDados.pas=D:\Teste Delphi\Unit1.pas</Transaction>
+    <Transaction>2024/10/14 09:41:08.000.647,=D:\Teste Delphi\Unit1.pas</Transaction>
+    <Transaction>2024/10/14 09:41:29.000.601,D:\Teste Delphi\view\unitPedidoVenda.pas=D:\Teste Delphi\Unit1.pas</Transaction>
+    <Transaction>2024/10/14 09:41:29.000.601,D:\Teste Delphi\view\unitPedidoVenda.dfm=D:\Teste Delphi\Unit1.dfm</Transaction>
+    <Transaction>2024/10/14 10:29:46.886,=D:\Teste Delphi\Unit1.pas</Transaction>
+    <Transaction>2024/10/14 10:29:56.700,D:\Teste Delphi\control\unitFuncoes.pas=D:\Teste Delphi\Unit1.pas</Transaction>
+    <Transaction>2024/10/14 13:31:58.195,=D:\Teste Delphi\Unit1.pas</Transaction>
+    <Transaction>2024/10/14 13:32:39.262,D:\Teste Delphi\view\unitBuscarCliente.dfm=D:\Teste Delphi\Unit1.dfm</Transaction>
+    <Transaction>2024/10/14 13:32:39.262,D:\Teste Delphi\view\unitBuscarCliente.pas=D:\Teste Delphi\Unit1.pas</Transaction>
+  </Transactions>
+</BorlandProject>

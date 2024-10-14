@@ -1,0 +1,103 @@
+#criação de base
+CREATE DATABASE teste_delphi;
+
+
+#criação da tabela clientes
+CREATE TABLE `teste_delphi`.`clientes` (
+  `codigo` INT NOT NULL AUTO_INCREMENT,
+  `nome` VARCHAR(150) NULL,
+  `cidade` VARCHAR(50) NULL,
+  `uf` VARCHAR(2) NULL,
+  PRIMARY KEY (`codigo`));
+
+#inserts de clientes
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Ana', 'Campinas', 'SP');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Carlos', 'Rio de Janeiro', 'RJ');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Mariana', 'Belo Horizonte', 'MG');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Roberto', 'Salvador', 'BA');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Fernanda', 'Curitiba', 'PR');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Lucas', 'São Paulo', 'SP');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Juliana', 'Porto Alegre', 'RS');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Pedro', 'Recife', 'PE');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Bianca', 'Florianópolis', 'SC');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Eduardo', 'Fortaleza', 'CE');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Paula', 'Manaus', 'AM');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Rafael', 'Brasília', 'DF');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Sofia', 'Natal', 'RN');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Felipe', 'Belém', 'PA');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Isabela', 'São Luís', 'MA');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Ricardo', 'Maceió', 'AL');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Júlia', 'Aracaju', 'SE');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Marcelo', 'João Pessoa', 'PB');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Gabriela', 'Campo Grande', 'MS');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Thiago', 'Vitória', 'ES');
+INSERT INTO `teste_delphi`.`clientes` (`nome`, `cidade`, `uf`) VALUES ('Bruna', 'Goiânia', 'GO');
+
+#criação da tabela de produtos
+CREATE TABLE `teste_delphi`.`produtos` (
+  `codigo` INT NOT NULL AUTO_INCREMENT,
+  `descricao` VARCHAR(150) NULL,
+  `preco_de_venda` DECIMAL(10,2) NULL,
+  PRIMARY KEY (`codigo`));
+
+#inserts de produtos
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Arroz 5kg', 25.50);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Feijão preto 1kg', 7.90);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Macarrão 500g', 4.30);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Óleo de soja 900ml', 6.75);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Leite integral 1L', 4.80);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Café 500g', 12.20);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Açúcar refinado 1kg', 3.40);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Farinha de trigo 1kg', 5.90);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Sal 1kg', 1.99);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Margarina 500g', 6.30);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Detergente líquido 500ml', 2.75);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Amaciante 2L', 11.50);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Papel higiênico 12 rolos', 15.90);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Shampoo 300ml', 18.30);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Creme dental 90g', 4.50);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Água sanitária 1L', 3.10);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Desinfetante 500ml', 7.20);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Sabonete 90g', 1.80);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Alvejante sem cloro 1L', 8.90);
+INSERT INTO `teste_delphi`.`produtos` (`descricao`, `preco_de_venda`) VALUES ('Biscoito recheado 130g', 3.70);
+
+
+
+
+#criacao da tabela pedidos_dados_gerais
+CREATE TABLE `teste_delphi`.`pedidos_dados_gerais` (
+  `numero_pedido` INT NOT NULL auto_increment,
+  `data_emissao` DATETIME NULL,
+  `codigo_cliente` INT NULL,
+  `valor_total` DECIMAL(10,2) NULL,
+  PRIMARY KEY (`numero_pedido`),
+  INDEX `FK_Cliente_idx` (`codigo_cliente` ASC),
+  CONSTRAINT `FK_Cliente`
+    FOREIGN KEY (`codigo_cliente`)
+    REFERENCES `teste_delphi`.`clientes` (`codigo`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
+
+#criação da tabela pedidos_produtos
+CREATE TABLE `teste_delphi`.`pedidos_produtos` (
+  `pedidos_produtos_id` INT NOT NULL auto_increment,
+  `numero_pedido` INT NULL,
+  `codigo_produto` INT NULL,
+  `quantidade` INT NULL,
+  `valor_unitario` DECIMAL(10,2) NULL,
+  `valor_total` DECIMAL(10,2) NULL,
+  PRIMARY KEY (`pedidos_produtos_id`),
+  INDEX `FK_Pedido_idx` (`numero_pedido` ASC),
+  INDEX `FK_Produto_idx` (`codigo_produto` ASC),
+  CONSTRAINT `FK_Pedido`
+    FOREIGN KEY (`numero_pedido`)
+    REFERENCES `teste_delphi`.`pedidos_dados_gerais` (`numero_pedido`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `FK_Produto`
+    FOREIGN KEY (`codigo_produto`)
+    REFERENCES `teste_delphi`.`produtos` (`codigo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
