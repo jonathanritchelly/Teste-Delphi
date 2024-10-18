@@ -3,7 +3,7 @@ object frmPedidoVenda: TfrmPedidoVenda
   Top = 0
   Caption = 'Pedido de venda'
   ClientHeight = 663
-  ClientWidth = 871
+  ClientWidth = 933
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,7 +13,7 @@ object frmPedidoVenda: TfrmPedidoVenda
   Position = poMainFormCenter
   OnShow = FormShow
   DesignSize = (
-    871
+    933
     663)
   TextHeight = 20
   object Label1: TLabel
@@ -125,7 +125,7 @@ object frmPedidoVenda: TfrmPedidoVenda
     Hint = 'Digite apenas n'#250'meros e pressione ENTER para buscar'
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 2
+    TabOrder = 3
     OnChange = txtCodigoChange
     OnExit = txtCodigoExit
     OnKeyPress = txtCodigoKeyPress
@@ -136,22 +136,23 @@ object frmPedidoVenda: TfrmPedidoVenda
     Width = 449
     Height = 28
     Enabled = False
-    TabOrder = 4
+    TabOrder = 5
   end
   object txtValorUnitario: TEdit
     Left = 24
     Top = 271
     Width = 145
     Height = 28
-    TabOrder = 5
+    TabOrder = 6
     OnChange = txtValorUnitarioChange
+    OnKeyPress = txtValorUnitarioKeyPress
   end
   object txtQuantidade: TEdit
     Left = 175
     Top = 271
     Width = 78
     Height = 28
-    TabOrder = 6
+    TabOrder = 7
     OnChange = txtQuantidadeChange
   end
   object txtTotal: TEdit
@@ -160,7 +161,7 @@ object frmPedidoVenda: TfrmPedidoVenda
     Width = 145
     Height = 28
     ReadOnly = True
-    TabOrder = 7
+    TabOrder = 8
   end
   object btConfirmar: TButton
     Left = 409
@@ -168,18 +169,18 @@ object frmPedidoVenda: TfrmPedidoVenda
     Width = 145
     Height = 49
     Caption = 'Confirmar produto'
-    TabOrder = 8
+    TabOrder = 9
     OnClick = btConfirmarClick
   end
   object grdItens: TDBGrid
     Left = 24
     Top = 328
-    Width = 816
+    Width = 878
     Height = 237
     Anchors = [akLeft, akTop, akRight]
     DataSource = dsItens
     ReadOnly = True
-    TabOrder = 9
+    TabOrder = 10
     TitleFont.Charset = DEFAULT_CHARSET
     TitleFont.Color = clWindowText
     TitleFont.Height = -15
@@ -226,7 +227,7 @@ object frmPedidoVenda: TfrmPedidoVenda
   object stBar: TStatusBar
     Left = 0
     Top = 633
-    Width = 871
+    Width = 933
     Height = 30
     Panels = <
       item
@@ -237,11 +238,11 @@ object frmPedidoVenda: TfrmPedidoVenda
         Text = '0,00'
         Width = 100
       end>
-    ExplicitTop = 536
+    ExplicitWidth = 871
   end
   object btGravar: TButton
-    Left = 695
-    Top = 576
+    Left = 757
+    Top = 571
     Width = 145
     Height = 49
     Caption = 'Gravar pedido'
@@ -254,7 +255,7 @@ object frmPedidoVenda: TfrmPedidoVenda
     Width = 449
     Height = 28
     Enabled = False
-    TabOrder = 3
+    TabOrder = 12
   end
   object btBuscaCliente: TButton
     Left = 479
@@ -280,18 +281,18 @@ object frmPedidoVenda: TfrmPedidoVenda
     Width = 145
     Height = 49
     Caption = 'Cancelar pedido'
-    TabOrder = 12
+    TabOrder = 4
     Visible = False
     OnClick = btCancelarPedidoClick
   end
   object btNovo: TButton
-    Left = 630
-    Top = 114
+    Left = 781
+    Top = 22
     Width = 145
     Height = 49
     Caption = 'Novo pedido'
-    TabOrder = 13
-    Visible = False
+    Enabled = False
+    TabOrder = 2
     OnClick = btNovoClick
   end
   object cdsItens: TClientDataSet

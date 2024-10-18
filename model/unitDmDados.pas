@@ -8,7 +8,7 @@ uses
   FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Phys.MySQL,
   FireDAC.Phys.MySQLDef, FireDAC.VCLUI.Wait, Data.DB, FireDAC.Comp.Client,
   System.SysUtils, Vcl.Forms, FireDAC.Stan.Param, FireDAC.DatS,
-  FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet;
+  FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet, Datasnap.DBClient;
 
 type
   TdmDados = class(TDataModule)
@@ -24,10 +24,8 @@ type
   public
     function pCriaQuery(qry: TFDQuery; Mode: Integer = 0): TFDQuery;
     procedure pLimpaQuery(Query: TFDQuery);
-    function fInserePedido(vCodigoCliente: Integer;
-      vValorTotal: currency): Integer;
-    procedure pInsereItenPedido(vNumeroPedido, vCodigoProduto,
-      vQuantidade: Integer; vValorUnitario, vValorTotal: currency);
+    function fInserePedido(vCodigoCliente: Integer; vValorTotal: currency;
+      vcdsItens: TClientDataSet): Integer;
     procedure pBuscaCliente(ValorBusca: string);
     function pCancelaPedido(vNumeroPedido: Integer): boolean;
     { Public declarations }
@@ -46,19 +44,16 @@ uses unitFuncoes;
 procedure TdmDados.DataModuleCreate(Sender: TObject);
 var
   vListaBD: TStringList;
-var
   vBanco, vUsuario, vSenha, vPorta, vServidor, vLib: String;
 begin
-
   try
     vListaBD := TStringList.Create;
 
-    if not(FileExists(ExtractFilePath(Application.ExeName) + '\strCon.ini'))
-    then
+    if not(FileExists(ExtractFilePath(Application.ExeName) + '\strCon.ini')) then
     begin
       MsgErro('Arquivo de conexão com a base não encontrado!');
       Application.Terminate;
-      exit;
+      Exit;
     end;
 
     vListaBD.LoadFromFile(ExtractFilePath(Application.ExeName) + '\strCon.ini');
@@ -82,24 +77,24 @@ begin
       FDPhysMySQLDriverLink1.VendorLib := vLib;
 
       try
-        Conn.Connected := true;
+        Conn.Connected := True;
       except
-        on E: exception do
+        on E: Exception do
         begin
-          MsgErro('Não foi possível conectar com o banco de dados!' + breakLine
-            + E.Message);
+          MsgErro('Não foi possível conectar com o banco de dados!' + breakLine +
+            E.Message);
           Application.Terminate;
-          exit;
+          Exit;
         end;
       end;
 
     except
-      on E: exception do
+      on E: Exception do
       begin
         MsgErro('Falha ao carregar arquivo de conexão!' + breakLine +
           E.Message);
         Application.Terminate;
-        exit;
+        Exit;
       end;
 
     end;
@@ -107,8 +102,8 @@ begin
   finally
     vListaBD.Free;
   end;
-
 end;
+
 
 function TdmDados.pCriaQuery(qry: TFDQuery; Mode: Integer = 0): TFDQuery;
 begin
@@ -130,76 +125,64 @@ begin
   Query.SQL.Clear;
 end;
 
-Function TdmDados.fInserePedido(vCodigoCliente: Integer;
-  vValorTotal: currency): Integer;
+function TdmDados.fInserePedido(vCodigoCliente: Integer; vValorTotal: Currency;
+  vcdsItens: TClientDataSet): Integer;
 var
   qry: TFDQuery;
+  i, vPedidoID: Integer;
 begin
-
   qry := pCriaQuery(qry);
-
   Conn.StartTransaction;
-  try
 
+  try
     try
       qry.SQL.Text :=
-        'INSERT INTO pedidos_dados_gerais (data_emissao, codigo_cliente, valor_total) Values(NOW(), :codCliente, :valorTotal)';
+        'INSERT INTO pedidos_dados_gerais (data_emissao, codigo_cliente, valor_total) ' +
+        'Values(NOW(), :codCliente, :valorTotal)';
       qry.ParamByName('codCliente').AsInteger := vCodigoCliente;
       qry.ParamByName('valorTotal').AsCurrency := vValorTotal;
 
       qry.ExecSQL;
-      Conn.Commit;
-
-      pLimpaQuery(qry);
 
       qry.SQL.Text := 'SELECT LAST_INSERT_ID()';
       qry.Open;
-      Result := qry.Fields[0].AsInteger;
-
-    except
-      on E: exception do
-      begin
-        Conn.Rollback;
-        MsgErro('Erro ao inserir registro: ' + E.Message);
-      end;
-
-    end;
-
-  finally
-    pLimpaQuery(qry);
-    freeandnil(qry);
-  end;
-end;
-
-procedure TdmDados.pInsereItenPedido(vNumeroPedido, vCodigoProduto,
-  vQuantidade: Integer; vValorUnitario, vValorTotal: currency);
-var
-  qry: TFDQuery;
-begin
-
-  qry := pCriaQuery(qry);
-
-  Conn.StartTransaction;
-  try
-
-    try
-      qry.SQL.Text :=
-        'INSERT INTO pedidos_produtos (numero_pedido, codigo_produto, quantidade, valor_unitario, valor_total) '
-        + 'Values(:numeroPedido, :codigoProduto, :quantidade, :valorUnitario, :valorTotal)';
-
-      qry.ParamByName('numeroPedido').AsInteger := vNumeroPedido;
-      qry.ParamByName('codigoProduto').AsCurrency := vCodigoProduto;
-      qry.ParamByName('quantidade').AsInteger := vQuantidade;
-      qry.ParamByName('valorUnitario').AsCurrency := vValorUnitario;
-      qry.ParamByName('valorTotal').AsCurrency := vValorTotal;
-
-      qry.ExecSQL;
-      Conn.Commit;
+      vPedidoID := qry.Fields[0].AsInteger;
 
       pLimpaQuery(qry);
 
+      // Insere os itens do pedido
+      try
+        qry.SQL.Text :=
+          'INSERT INTO pedidos_produtos (numero_pedido, codigo_produto, quantidade, valor_unitario, valor_total) ' +
+          'Values(:numeroPedido, :codigoProduto, :quantidade, :valorUnitario, :valorTotal)';
+
+        for i := 0 to vcdsItens.RecordCount - 1 do
+        begin
+          qry.ParamByName('numeroPedido').AsInteger := vPedidoID;
+          qry.ParamByName('codigoProduto').AsInteger := vcdsItens.FieldByName('Codigo').AsInteger;
+          qry.ParamByName('quantidade').AsInteger := vcdsItens.FieldByName('Quantidade').AsInteger;
+          qry.ParamByName('valorUnitario').AsCurrency := vcdsItens.FieldByName('ValorUnitario').AsCurrency;
+          qry.ParamByName('valorTotal').AsCurrency := vcdsItens.FieldByName('Total').AsCurrency;
+
+          qry.ExecSQL;
+          vcdsItens.Next;
+        end;
+
+        Conn.Commit; // Se tudo der certo, commit
+
+      except
+        on E: Exception do
+        begin
+          Conn.Rollback; // Em caso de erro, rollback
+          MsgErro('Erro ao inserir itens do pedido: ' + E.Message);
+        end;
+      end;
+
+      pLimpaQuery(qry);
+      Result := vPedidoID;
+
     except
-      on E: exception do
+      on E: Exception do
       begin
         Conn.Rollback;
         MsgErro('Erro ao inserir registro: ' + E.Message);
@@ -209,77 +192,71 @@ begin
 
   finally
     pLimpaQuery(qry);
-    freeandnil(qry);
+    FreeAndNil(qry);
   end;
 end;
+
+
 
 procedure TdmDados.pBuscaCliente(ValorBusca: string);
 begin
   pLimpaQuery(qryClientes);
-  qryClientes.SQL.Add('SELECT  * FROM teste_delphi.Clientes ');
+  qryClientes.SQL.Clear; // Limpa a consulta antes de adicionar novas instruções
+  qryClientes.SQL.Add('SELECT * FROM teste_delphi.Clientes');
 
   if ValorBusca <> '' then
   begin
-    qryClientes.SQL.Add('Where nome like ' + QuotedStr('%' + ValorBusca + '%'));
+    qryClientes.SQL.Add(' WHERE nome LIKE ' + QuotedStr('%' + ValorBusca + '%'));
+
     if fRetiraNumerosString(ValorBusca) <> '' then
-      qryClientes.SQL.Add('OR codigo like ' +
-        QuotedStr('%' + fRetiraNumerosString(ValorBusca) + '%'));
+      qryClientes.SQL.Add(' OR codigo LIKE ' + QuotedStr('%' + fRetiraNumerosString(ValorBusca) + '%'));
   end;
 
-  qryClientes.SQL.Add('Order by Nome');
-  qryClientes.Open();
+  qryClientes.SQL.Add(' ORDER BY Nome');
+  qryClientes.Open;
 end;
 
-function TdmDados.pCancelaPedido(vNumeroPedido: Integer): boolean;
+
+function TdmDados.pCancelaPedido(vNumeroPedido: Integer): Boolean;
 var
   qry: TFDQuery;
 begin
-
   qry := pCriaQuery(qry);
-
   Conn.StartTransaction;
   try
-
     try
-      // deleta os itens
-      qry.SQL.Text :=
-        'Delete from pedidos_produtos where numero_pedido= :numeroPedido';
-
+      // Deleta os itens do pedido
+      qry.SQL.Text := 'DELETE FROM pedidos_produtos WHERE numero_pedido = :numeroPedido';
       qry.ParamByName('numeroPedido').AsInteger := vNumeroPedido;
-
       qry.ExecSQL;
 
       pLimpaQuery(qry);
 
-      // deleta o pedido
-      qry.SQL.Text :=
-        'Delete from pedidos_dados_gerais where numero_pedido= :numeroPedido';
-
+      // Deleta o pedido
+      qry.SQL.Text := 'DELETE FROM pedidos_dados_gerais WHERE numero_pedido = :numeroPedido';
       qry.ParamByName('numeroPedido').AsInteger := vNumeroPedido;
-
       qry.ExecSQL;
 
       Conn.Commit;
 
       pLimpaQuery(qry);
-
       MsgInformacao('Pedido excluído com sucesso!');
-      Result := true;
+      Result := True;
 
     except
-      on E: exception do
+      on E: Exception do
       begin
         Conn.Rollback;
-        MsgErro('Erro ao inserir registro: ' + E.Message);
+        MsgErro('Erro ao excluir registro: ' + E.Message);
         Result := False;
       end;
-
     end;
 
   finally
     pLimpaQuery(qry);
-    freeandnil(qry);
+    FreeAndNil(qry);
   end;
 end;
+
 
 end.

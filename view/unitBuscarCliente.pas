@@ -20,6 +20,7 @@ type
     procedure txtBuscaChange(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure grdClientesDblClick(Sender: TObject);
+    procedure grdClientesKeyPress(Sender: TObject; var Key: Char);
   private
     { Private declarations }
   public
@@ -38,24 +39,28 @@ uses unitDmDados, unitPedidoVenda, unitFuncoes;
 procedure TFrmBuscarCliente.FormShow(Sender: TObject);
 begin
   dmdados.pBuscaCliente('');
+  txtBusca.SetFocus;
 end;
 
 procedure TFrmBuscarCliente.grdClientesDblClick(Sender: TObject);
 begin
   if dmdados.qryClientes.RecordCount > 0 then
   begin
-    if MsgYesNo('Confirmar a escolha de: ' + dmdados.qryClientes.FieldByName
-      ('nome').AsString + '?') = false then
+    if MsgYesNo('Confirmar a escolha de: ' + dmdados.qryClientes.FieldByName('nome').AsString + '?') = false then
       exit;
 
-    frmPedidoVenda.vClienteID := dmdados.qryClientes.FieldByName('codigo')
-      .AsInteger;
-    frmPedidoVenda.vClienteNome := dmdados.qryClientes.FieldByName
-      ('nome').AsString;
-
+    frmPedidoVenda.vClienteID := dmdados.qryClientes.FieldByName('codigo').AsInteger;
+    frmPedidoVenda.vClienteNome := dmdados.qryClientes.FieldByName('nome').AsString;
     Close;
 
   end;
+end;
+
+procedure TFrmBuscarCliente.grdClientesKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  if key = #13 then
+    grdClientesDblClick(grdClientes);
 end;
 
 procedure TFrmBuscarCliente.txtBuscaChange(Sender: TObject);

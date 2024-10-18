@@ -38,9 +38,6 @@ object FrmBuscarCliente: TFrmBuscarCliente
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitLeft = 10
-    ExplicitTop = 94
-    ExplicitWidth = 385
     object shp_pesquisa: TShape
       Left = 0
       Top = 0
@@ -136,6 +133,7 @@ object FrmBuscarCliente: TFrmBuscarCliente
     TitleFont.Name = 'Segoe UI'
     TitleFont.Style = []
     OnDblClick = grdClientesDblClick
+    OnKeyPress = grdClientesKeyPress
     Columns = <
       item
         Expanded = False

@@ -49,60 +49,74 @@ Begin
   MessageDlg(Msg, mtInformation, [mbOK], 0);
 End;
 
-function fBuscaProduto(out Descricao: string; out PrecoSugerido: currency;
-  CodigoProduto: integer): String;
+function fBuscaProduto(out Descricao: string; out PrecoSugerido: Currency;
+  CodigoProduto: Integer): String;
 var
-  qry: TFDQUEry;
+  qry: TFDQuery;
 begin
   qry := dmdados.pCriaQuery(qry);
 
   try
-    qry.SQL.Add('SELECT * FROM Produtos Where Codigo= :Codigo');
+    qry.SQL.Add('SELECT * FROM Produtos WHERE Codigo = :Codigo');
     qry.ParamByName('Codigo').AsInteger := CodigoProduto;
 
     try
-      qry.Open();
+      qry.Open;
     except
-      on E: exception do
+      on E: Exception do
       begin
         MsgErro('Falha ao consultar produto!' + breakLine + E.Message);
+        Exit;
       end;
     end;
 
-    Descricao := qry.FieldByName('Descricao').AsString;
-    PrecoSugerido := qry.FieldByName('preco_de_venda').AsCurrency;
+    if not qry.IsEmpty then
+    begin
+      Descricao := qry.FieldByName('Descricao').AsString;
+      PrecoSugerido := qry.FieldByName('preco_de_venda').AsCurrency;
+      Result := 'Produto encontrado';
+    end
+    else
+    begin
+      Result := 'Produto não encontrado';
+      Descricao := '';
+      PrecoSugerido := 0;
+    end;
 
   finally
     qry.Close;
     FreeAndNil(qry);
   end;
-
 end;
+
 
 function fRetiraNumerosString(Texto: String): string;
 var
-  nI: integer;
+  nI: Integer;
   TextoLimpo: String;
 begin
   TextoLimpo := '';
-  For nI := 1 to Length(Texto) do
+  for nI := 1 to Length(Texto)  do
   begin
-    if Texto[nI] in ['0' .. '9'] then
+    if Texto[nI] in ['0'..'9'] then
       TextoLimpo := TextoLimpo + Texto[nI];
   end;
   Result := TextoLimpo;
 end;
 
-procedure pBuscaPedido(vNumeroPedido: integer);
+
+procedure pBuscaPedido(vNumeroPedido: Integer);
 var
-  qry: TFDQUEry;
+  qry: TFDQuery;
 begin
   qry := dmdados.pCriaQuery(qry);
 
   try
-    qry.Open('select P.*, nome from pedidos_dados_gerais P ' +
-      'inner join clientes ON codigo = codigo_cliente Where numero_pedido=' +
-      vNumeroPedido.ToString);
+    qry.SQL.Text := 'SELECT P.*, nome FROM pedidos_dados_gerais P ' +
+                    'INNER JOIN clientes ON codigo = codigo_cliente ' +
+                    'WHERE numero_pedido = :numeroPedido';
+    qry.ParamByName('numeroPedido').AsInteger := vNumeroPedido;
+    qry.Open;
 
     if qry.RecordCount = 0 then
     begin
@@ -122,26 +136,25 @@ begin
 
     dmdados.pLimpaQuery(qry);
 
-    qry.Open('select P.*, descricao from teste_delphi.pedidos_produtos P ' +
-      'inner join teste_delphi.produtos ON codigo = codigo_produto where numero_pedido ='
-      + vNumeroPedido.ToString);
+    qry.SQL.Text := 'SELECT P.*, descricao FROM teste_delphi.pedidos_produtos P ' +
+                    'INNER JOIN teste_delphi.produtos ON codigo = codigo_produto ' +
+                    'WHERE numero_pedido = :numeroPedido';
+    qry.ParamByName('numeroPedido').AsInteger := vNumeroPedido;
+    qry.Open;
 
     with frmPedidoVenda.cdsItens do
     begin
       EmptyDataSet;
-      while not(qry.Eof) do
+
+      while not qry.Eof do
       begin
         Append;
-        FieldByName('codigo').AsInteger := qry.FieldByName('codigo_produto')
-          .AsInteger;
-        FieldByName('Descricao').AsString :=
-          qry.FieldByName('descricao').AsString;
-        FieldByName('ValorUnitario').AsCurrency :=
-          qry.FieldByName('valor_unitario').AsCurrency;
-        FieldByName('Quantidade').AsInteger := qry.FieldByName('quantidade')
-          .AsInteger;
+        FieldByName('codigo').AsInteger := qry.FieldByName('codigo_produto').AsInteger;
+        FieldByName('Descricao').AsString := qry.FieldByName('descricao').AsString;
+        FieldByName('ValorUnitario').AsCurrency := qry.FieldByName('valor_unitario').AsCurrency;
+        FieldByName('Quantidade').AsInteger := qry.FieldByName('quantidade').AsInteger;
         FieldByName('idClient').AsInteger := RecordCount + 1;
-        post;
+        Post;
         qry.Next;
       end;
     end;
@@ -150,7 +163,7 @@ begin
     qry.Close;
     FreeAndNil(qry);
   end;
-
 end;
+
 
 end.

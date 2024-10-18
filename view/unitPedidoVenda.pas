@@ -61,10 +61,13 @@ type
     procedure btNovoClick(Sender: TObject);
     procedure btCancelarPedidoClick(Sender: TObject);
     procedure cdsItensAfterDelete(DataSet: TDataSet);
+    procedure txtValorUnitarioKeyPress(Sender: TObject; var Key: Char);
   private
     procedure pBuscaProduto;
     procedure pCalculaTotal;
     procedure pAtualizaTotal;
+    function ValidaPedido: Boolean;
+    function GravaPedido: Boolean;
 
   var
     idEdicao: integer;
@@ -92,13 +95,11 @@ procedure TfrmPedidoVenda.txtCodigoChange(Sender: TObject);
 var
   i: integer;
 begin
-
   if not TryStrToInt(txtCodigo.Text, i) then
   begin
     txtCodigo.Text := Copy(txtCodigo.Text, 1, Length(txtCodigo.Text) - 1);
     txtCodigo.SelStart := Length(txtCodigo.Text);
   end;
-
 end;
 
 procedure TfrmPedidoVenda.txtCodigoExit(Sender: TObject);
@@ -125,6 +126,13 @@ begin
   pCalculaTotal;
 end;
 
+procedure TfrmPedidoVenda.txtValorUnitarioKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  if not(Key in ['0' .. '9', Char(VK_BACK), #13, ',']) then
+    Key := #0
+end;
+
 procedure TfrmPedidoVenda.pCalculaTotal();
 begin
   if txtQuantidade.Text = '' then
@@ -141,58 +149,58 @@ end;
 
 procedure TfrmPedidoVenda.btBuscaClienteClick(Sender: TObject);
 begin
-  if not(Assigned(FrmBuscarCliente)) then
+  if not Assigned(FrmBuscarCliente) then
     Application.CreateForm(TFrmBuscarCliente, FrmBuscarCliente);
 
   try
     FrmBuscarCliente.ShowModal;
   finally
-    freeandnil(FrmBuscarCliente)
+    FreeAndNil(FrmBuscarCliente);
   end;
 
   txtCliente.Text := vClienteNome;
   btBuscarPedido.Enabled := (vClienteID = 0);
-
+  btNovo.Enabled := not(vClienteID = 0);
 end;
 
 procedure TfrmPedidoVenda.btBuscarPedidoClick(Sender: TObject);
 var
   vNumeroPedido: string;
 begin
+
   InputQuery('Buscar pedido', 'Digite o número do pedido', vNumeroPedido);
 
   if fRetiraNumerosString(vNumeroPedido) = '' then
-    exit;
+    Exit;
 
   pBuscaPedido(StrtoInt(fRetiraNumerosString(vNumeroPedido)));
 
   if lblNumeroPedido.Visible then
   begin
-    btBuscaCliente.Enabled := false;
-    btGravar.Enabled := false;
-    btCancelarPedido.Visible := true;
-    btNovo.Visible := true;
-    btConfirmar.Enabled := false;
+    btBuscaCliente.Enabled := False;
+    btGravar.Enabled := False;
+    btCancelarPedido.Visible := True;
+    btNovo.Enabled := True;
+    btConfirmar.Enabled := False;
+    txtCodigo.Enabled := false;
   end;
-
 end;
 
 procedure TfrmPedidoVenda.btCancelarPedidoClick(Sender: TObject);
 begin
-  if not(msgYesNo('Deseja cancelar o pedido nº ' + fRetiraNumerosString
-    (lblNumeroPedido.Caption) + '?')) then
-    exit;
+  if not msgYesNo('Deseja cancelar o pedido nº ' + fRetiraNumerosString
+    (lblNumeroPedido.Caption) + '?') then
+    Exit;
 
   if dmDados.pCancelaPedido
     (StrtoInt(fRetiraNumerosString(lblNumeroPedido.Caption))) then
     LimpaPedido;
-
 end;
 
 procedure TfrmPedidoVenda.btConfirmarClick(Sender: TObject);
 begin
   if (txtProduto.Text = '') or (txtCodigo.Text = '') then
-    exit;
+    Exit;
 
   if idEdicao = 0 then
   begin
@@ -208,15 +216,54 @@ begin
   cdsItensQuantidade.AsInteger := StrtoInt(txtQuantidade.Text);
   cdsItens.Post;
 
-  lblEditando.Visible := false;
+  lblEditando.Visible := False;
   idEdicao := 0;
 
   txtProduto.Clear;
   txtValorUnitario.Text := '0,00';
-  txtQuantidade.Text := '0';;
+  txtQuantidade.Text := '0';
   txtCodigo.Clear;
   txtCodigo.SetFocus;
+end;
 
+function TfrmPedidoVenda.ValidaPedido: Boolean;
+begin
+  Result := False;
+
+  if vClienteID = 0 then
+  begin
+    MsgErro('Selecione o cliente!');
+    Exit;
+  end;
+
+
+  if cdsItens.RecordCount = 0 then
+  begin
+    MsgErro('Insira ao menos 1 item no pedido!');
+    Exit;
+  end;
+
+  if not msgYesNo('Deseja gravar o pedido?') then
+    Exit;
+
+  Result := True;
+end;
+
+function TfrmPedidoVenda.GravaPedido: Boolean;
+var
+  vNumeroPedido: integer;
+begin
+  Result := False;
+
+  vNumeroPedido := dmDados.fInserePedido(vClienteID, cdsItensagTotalGeral.Value,
+    cdsItens);
+
+  if vNumeroPedido <= 0 then
+    Exit;
+
+  MsgInformacao('Pedido Nº ' + vNumeroPedido.ToString +
+    ' inserido com sucesso!');
+  Result := True;
 end;
 
 procedure TfrmPedidoVenda.btGravarClick(Sender: TObject);
@@ -224,37 +271,17 @@ var
   vNumeroPedido: integer;
 begin
 
-  if cdsItens.RecordCount = 0 then
-  begin
-    MsgErro('Insira ao menos 1 item no pedido!');
-    exit;
-  end;
+  if not(ValidaPedido) then
+    Exit;
 
-  if vClienteID = 0 then
-  begin
-    MsgErro('Selecione o cliente!');
-    exit;
-  end;
-
-  if msgYesNo('Deseja gravar o pedido?') = false then
-    exit;
-
-  vNumeroPedido := dmDados.fInserePedido(vClienteID,
-    cdsItensagTotalGeral.Value);
+  vNumeroPedido := dmDados.fInserePedido(vClienteID, cdsItensagTotalGeral.Value,
+    cdsItens);
 
   if vNumeroPedido <= 0 then
-    exit;
-
-  cdsItens.First;
-  while not(cdsItens.Eof) do
-  begin
-    dmDados.pInsereItenPedido(vNumeroPedido, cdsItensCodigo.AsInteger,
-      cdsItensQuantidade.AsInteger, cdsItensValorUnitario.AsCurrency,
-      cdsItensTotal.AsCurrency);
-    cdsItens.Next;
-  end;
+    Exit;
 
   LimpaPedido;
+
   MsgInformacao('Pedido Nº ' + vNumeroPedido.ToString +
     ' inserido com sucesso!');
 
@@ -276,16 +303,17 @@ begin
   txtValorUnitario.Text := '0,00';
   txtTotal.Text := '0,00';
   txtQuantidade.Text := '0';
-  lblEditando.Visible := false;
+  lblEditando.Visible := False;
   cdsItens.EmptyDataSet;
-  btBuscarPedido.Enabled := true;
-  btBuscaCliente.Enabled := true;
-  btConfirmar.Enabled := true;
-  btNovo.Visible := false;
-  btCancelarPedido.Visible := false;
-  lblNumeroPedido.Visible := false;
-  btGravar.Enabled := true;
+  btBuscarPedido.Enabled := True;
+  btBuscaCliente.Enabled := True;
+  btConfirmar.Enabled := True;
+  btNovo.Enabled := False;
+  btCancelarPedido.Visible := False;
+  lblNumeroPedido.Visible := False;
+  btGravar.Enabled := True;
   stBar.Panels[1].Text := '0,00';
+  txtCodigo.Enabled := true;
 
   btBuscaCliente.SetFocus;
 end;
@@ -326,9 +354,11 @@ procedure TfrmPedidoVenda.grdItensKeyDown(Sender: TObject; var Key: Word;
 begin
   if (Key = VK_DELETE) and (cdsItens.RecordCount > 0) then
   begin
-    if msgYesNo('Deseja excluir o produto?') = true then
+    if msgYesNo('Deseja excluir o produto?') = True then
       cdsItens.Delete;
-  end;
+  end
+  else if (Key = VK_TAB) and (btGravar.Enabled) then
+    btGravar.SetFocus;
 end;
 
 procedure TfrmPedidoVenda.grdItensKeyPress(Sender: TObject; var Key: Char);
@@ -342,7 +372,7 @@ begin
     txtQuantidade.Text := cdsItensQuantidade.AsInteger.ToString;
     txtValorUnitario.Text := cdsItensValorUnitario.AsFloat.ToString;
     txtTotal.Text := cdsItensTotal.AsFloat.ToString;
-    lblEditando.Visible := true;
+    lblEditando.Visible := True;
   end;
 
 end;
